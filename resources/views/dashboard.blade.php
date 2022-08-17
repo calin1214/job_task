@@ -1,25 +1,16 @@
-<?php
-$appointmentLabelText = 'Choose date and time to make an appointment';
-$timeList = [];
 
-for ($i = 9; $i <= 20; $i = $i + 0.5) {
-    if ($i > 12 && $i < 15.5) {
-        continue;
+<style>
+    #set_flash_text {
+        margin: 0;
+        padding: 8px;
+        color: white;
     }
-
-    if (strpos($i, '.') === false) {
-        $time = '00';
-    } else {
-        $time = '30';
-    }
-    $timeList[(int)$i . ":{$time}"] = (int)$i . ":{$time}";
-}
-?>
+</style>
 
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
+            {{ __('My application') }}
         </h2>
     </x-slot>
 
@@ -49,6 +40,8 @@ for ($i = 9; $i <= 20; $i = $i + 0.5) {
                     </button>
                 </div>
             </div>
+        </div>
+        <div id="set_flash_text" class="row mt-4">
         </div>
     </div>
 </x-app-layout>
@@ -127,28 +120,31 @@ for ($i = 9; $i <= 20; $i = $i + 0.5) {
         function saveDate(date) {
             appointmentData.date = date || undefined
             checkAppointmentData()
-            console.log(appointmentData)
         }
 
         function saveTime() {
             appointmentData.time = $('#time_select_id').val() || undefined
             checkAppointmentData()
-            console.log(appointmentData)
         }
 
         function checkAppointmentData() {
             if (appointmentData.date === undefined || appointmentData.time === undefined) {
                 $('#save_appointment_btn').attr('disabled', true)
-                $('#appointment_label').text('<?php echo $appointmentLabelText ?>')
+                $('#appointment_label').text('{{$appointmentLabelText}}')
             } else {
                 $('#save_appointment_btn').attr('disabled', false)
                 $('#appointment_label').text('appointment on ' + appointmentData.date + ' at ' + appointmentData.time)
             }
         }
 
+        function getData() {
+            return appointmentData
+        }
+
         return {
             saveDate,
-            saveTime
+            saveTime,
+            getData
         }
     })()
 
@@ -156,6 +152,29 @@ for ($i = 9; $i <= 20; $i = $i + 0.5) {
      * Confirm the appointment
      */
     function makeAppointment() {
+        let token = $('meta[name="csrf-token"]').attr('content');
 
+        $.ajax({
+            type: "POST",
+            url: 'set-appointment',
+            data: {
+                _token: token,
+                appointmentData: JSON.stringify(appointmentDataFunction.getData()),
+            },
+            success: function (response) {
+                $('#set_flash_text').empty().text('You have made an appointment ' + response + ' with success')
+                    .removeClass('bg-danger').addClass('bg-success')
+
+                // REMOVE THE SUCCESS MESSAGE FLASH AFTER SOME TIME
+                // IN OUR CASE AFTER 5 SECONDS
+                setTimeout(function () {
+                    $('#set_flash_text').empty().removeClass('bg-success')
+                }, 5000)
+            },
+            error: function (XHR) {
+                let error = JSON.parse(XHR.responseText)
+                $('#set_flash_text').empty().text(error.message).removeClass('bg-success').addClass('bg-danger')
+            }
+        });
     }
 </script>

@@ -18,7 +18,8 @@ class InitNewAppointmentTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('no action')->onUpdate('no action');
             $table->dateTime('appointment_on');
-            $table->dateTime('created_at');
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 
