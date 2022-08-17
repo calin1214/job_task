@@ -16,13 +16,23 @@ class AppointmentController extends Controller
 
     public function index()
     {
+        $appointments = Appointment::select('user_id', 'appointment_on')->where('user_id', Auth::id())->orderBy('id', 'desc')->get();
+
         return view('dashboard')
+            ->with('myAppointments', $appointments)
             ->with('appointmentLabelText', 'Choose date and time to make an appointment(here is shown just available time)');
     }
 
     public function setAppointments(Request $request)
     {
         $data = json_decode($request->get('appointmentData'));
+
+        // VALIDATE THAT USER INTERVAL USER HAS CHOSEN IS AVAILABLE
+        try {
+            Appointment::validateAppointment(json_decode($request->get('appointmentData')));
+        } catch (Exception $exc) {
+            throw new Exception($exc->getMessage());
+        }
 
         $appointment = new Appointment();
         $appointment->user_id = Auth::id();

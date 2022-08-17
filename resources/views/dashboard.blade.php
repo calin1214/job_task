@@ -37,6 +37,17 @@
                     </button>
                 </div>
             </div>
+            <div class="col-4">
+                <label class="mb-4" style="font-weight: bold">My Appointments</label>
+                <div id="my_appointments_card" style="height: 220px; overflow-y: auto;">
+                    @foreach($myAppointments as $appointment)
+                        <div>
+                            on {{explode(" ", $appointment->appointment_on)[0]}} at {{substr(explode(" ", $appointment->appointment_on)[1], 0, -3)}}
+                        </div>
+                        <hr>
+                    @endforeach
+                </div>
+            </div>
         </div>
         <div id="set_flash_text" class="row mt-4">
         </div>
@@ -74,6 +85,7 @@
                 clickDay(event, date) {
                     disableHolidayDays()
                     appointmentDataFunction.saveDate(date[0])
+                    appointmentDataFunction.saveTime(true)
                     getFreeTime(date[0])
                 },
                 clickMonth() {
@@ -122,8 +134,8 @@
             checkAppointmentData()
         }
 
-        function saveTime() {
-            appointmentData.time = $('#time_select_id').val() || undefined
+        function saveTime(isUndefined = false) {
+            appointmentData.time = !isUndefined && $('#time_select_id').val() !== '0' ? $('#time_select_id').val() : undefined
             checkAppointmentData()
         }
 
@@ -186,10 +198,11 @@
                 appointmentData: JSON.stringify(appointmentDataFunction.getData()),
             },
             success: function (response) {
-                $('#time_select_id').empty();
+                $('#time_select_id').empty().append('<option value="0">Choose the time</option>');
                 $('.vanilla-calendar-day__btn_selected').removeClass('vanilla-calendar-day__btn_selected');
                 $('#set_flash_text').empty().text('You have made an appointment ' + response + ' with success')
                     .removeClass('bg-danger').addClass('bg-success')
+                $('#my_appointments_card').prepend('<hr>').prepend(response)
 
                 // REMOVE THE SUCCESS MESSAGE FLASH AFTER SOME TIME
                 // IN OUR CASE AFTER 5 SECONDS

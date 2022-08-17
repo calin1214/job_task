@@ -109,4 +109,23 @@ class Appointment extends Model
 
         return $timeList;
     }
+
+    public static function validateAppointment($data)
+    {
+        $appointments = Appointment::select('appointment_on')->where('appointment_on', 'like', "{$data->date} %")->get();
+
+        foreach ($appointments as $appointment) {
+            $appointmentDateTime = explode(" ", $appointment->appointment_on);
+            // one hour and half
+            $timeStep = 5400;
+            $startTime = strtotime($appointmentDateTime[1]) - $timeStep;
+            $endTime = strtotime($appointmentDateTime[1]) + $timeStep;
+
+            if (strtotime($data->time) > $startTime && strtotime($data->time) < $endTime) {
+                throw new \Exception('The date and time you want to choose was already taken. Please select another date');
+            }
+        }
+
+        return true;
+    }
 }
