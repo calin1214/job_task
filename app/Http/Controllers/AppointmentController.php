@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use mysql_xdevapi\Exception;
 
 class AppointmentController extends Controller
 {
@@ -18,8 +18,8 @@ class AppointmentController extends Controller
     {
         try {
             $appointments = Appointment::getAppointmentsForSelectedMonth(date('Y-m-d H:i:s'));
-        } catch (\Exception $exc) {
-            throw new \Exception($exc->getMessage());
+        } catch (Exception $exc) {
+            throw new Exception($exc->getMessage());
         }
 
         $appointmentLabelText = 'Choose date and time to make an appointment(here is shown just available time)';
