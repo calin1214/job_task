@@ -76,9 +76,6 @@
 
             settings: {
                 lang: 'en',
-                range: {
-                    disabled: ['2022-08-27', '2022-08-19'],
-                },
             },
 
             actions: {
@@ -95,13 +92,6 @@
                     disableHolidayDays()
                 },
             },
-
-            popups: {
-                '2022-08-18': {
-                    modifier: 'bg-red',
-                    html: 'Meeting at 9:00 PM',
-                },
-            }
         });
     }
 
