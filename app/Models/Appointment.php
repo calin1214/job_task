@@ -39,7 +39,7 @@ class Appointment extends Model
         $selectedYear = $selectedDateList[0];
         $selectedMonth = $selectedDateList[1];
 
-        return Appointment::where('appointment_on', '>', date('Y-m-d H:i:s'))
+        return Appointment::select('appointment_on')->where('appointment_on', '>', date('Y-m-d H:i:s'))
             ->where('appointment_on', 'like', "{$selectedYear}-%")
             ->where('appointment_on', 'like', "%-{$selectedMonth}-%")
             ->get();

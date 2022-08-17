@@ -22,6 +22,14 @@ class AppointmentController extends Controller
             throw new Exception($exc->getMessage());
         }
 
+        $appointmentsListByDay = [];
+        foreach ($appointments as $a) {
+            $day = explode("-", $a->appointment_on);
+
+            $appointmentsListByDay[$a->id] = $a->appointment_on;
+        }
+        die();
+
         $appointmentLabelText = 'Choose date and time to make an appointment(here is shown just available time)';
         $timeList = [];
 
