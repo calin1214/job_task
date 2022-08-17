@@ -16,40 +16,8 @@ class AppointmentController extends Controller
 
     public function index()
     {
-        try {
-            $appointments = Appointment::getAppointmentsForSelectedMonth(date('Y-m-d H:i:s'));
-        } catch (Exception $exc) {
-            throw new Exception($exc->getMessage());
-        }
-
-        $appointmentsListByDay = [];
-        foreach ($appointments as $a) {
-            $day = explode("-", $a->appointment_on);
-
-            $appointmentsListByDay[$a->id] = $a->appointment_on;
-        }
-        die();
-
-        $appointmentLabelText = 'Choose date and time to make an appointment(here is shown just available time)';
-        $timeList = [];
-
-        for ($i = 9; $i <= 20; $i = $i + 0.5) {
-            if ($i > 12 && $i < 15.5) {
-                continue;
-            }
-
-            if (strpos($i, '.') === false) {
-                $time = '00';
-            } else {
-                $time = '30';
-            }
-            $timeList[(int)$i . ":{$time}"] = (int)$i . ":{$time}";
-        }
-
         return view('dashboard')
-            ->with('appointments', $appointments)
-            ->with('appointmentLabelText', $appointmentLabelText)
-            ->with('timeList', $timeList);
+            ->with('appointmentLabelText', 'Choose date and time to make an appointment(here is shown just available time)');
     }
 
     public function setAppointments(Request $request)
@@ -65,5 +33,17 @@ class AppointmentController extends Controller
         }
 
         return "on {$data->date} at {$data->time}";
+    }
+
+    public function getFreeTime(Request $request)
+    {
+        try {
+            $appointments = Appointment::getAppointmentsForSelectedMonth($request->get('date'));
+            $timeList = Appointment::getFreeTimeIntervals($appointments, $request->get('date'));
+        } catch (Exception $exc) {
+            throw new Exception($exc->getMessage());
+        }
+
+        return $timeList;
     }
 }

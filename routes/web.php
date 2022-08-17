@@ -25,6 +25,7 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [AppointmentController::class, 'index'])->name('dashboard');
     Route::post('set-appointment', [AppointmentController::class, 'setAppointments']);
+    Route::post('get-free-time', [AppointmentController::class, 'getFreeTime']);
 });
 
 require __DIR__ . '/auth.php';

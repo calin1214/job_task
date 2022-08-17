@@ -1,4 +1,3 @@
-
 <style>
     #set_flash_text {
         margin: 0;
@@ -23,9 +22,7 @@
                 <div class="appointment-time">
                     <label for="time_select_id">Choose the time</label>
                     <select id="time_select_id" onchange="appointmentDataFunction.saveTime()">
-                        @foreach($timeList as $key => $time)
-                            <option value="{{$key}}">{{$time}}</option>
-                        @endforeach
+                        <option value="0">Choose the time</option>
                     </select>
                 </div>
                 <div>
@@ -47,6 +44,8 @@
 </x-app-layout>
 
 <script>
+    let token = $('meta[name="csrf-token"]').attr('content');
+
     document.addEventListener('DOMContentLoaded', () => {
         let appointmentCalendar = drawCalendar()
         appointmentCalendar.init();
@@ -67,7 +66,7 @@
             settings: {
                 lang: 'en',
                 range: {
-                    disabled: ['2022-08-17', '2022-08-19'],
+                    disabled: ['2022-08-27', '2022-08-19'],
                 },
             },
 
@@ -75,6 +74,7 @@
                 clickDay(event, date) {
                     disableHolidayDays()
                     appointmentDataFunction.saveDate(date[0])
+                    getFreeTime(date[0])
                 },
                 clickMonth() {
                     disableHolidayDays()
@@ -149,11 +149,35 @@
     })()
 
     /**
+     * Get free time for making an appointment for selected day
+     */
+    function getFreeTime(date) {
+        $.ajax({
+            type: "POST",
+            url: 'get-free-time',
+            data: {
+                _token: token,
+                date: date,
+            },
+            success: function (response) {
+                let options = '<option value="0">Choose the time</option>';
+                for (let x in response) {
+                    options += '<option value="' + x + '">' + response[x] + '</option>'
+                }
+
+                $('#time_select_id').empty().append(options)
+            },
+            error: function (XHR) {
+                let error = JSON.parse(XHR.responseText)
+                $('#set_flash_text').empty().text(error.message).removeClass('bg-success').addClass('bg-danger')
+            }
+        });
+    }
+
+    /**
      * Confirm the appointment
      */
     function makeAppointment() {
-        let token = $('meta[name="csrf-token"]').attr('content');
-
         $.ajax({
             type: "POST",
             url: 'set-appointment',
@@ -162,18 +186,20 @@
                 appointmentData: JSON.stringify(appointmentDataFunction.getData()),
             },
             success: function (response) {
+                $('#time_select_id').empty();
+                $('.vanilla-calendar-day__btn_selected').removeClass('vanilla-calendar-day__btn_selected');
                 $('#set_flash_text').empty().text('You have made an appointment ' + response + ' with success')
                     .removeClass('bg-danger').addClass('bg-success')
 
                 // REMOVE THE SUCCESS MESSAGE FLASH AFTER SOME TIME
                 // IN OUR CASE AFTER 5 SECONDS
                 setTimeout(function () {
-                    $('#set_flash_text').empty().removeClass('bg-success')
+                    $('#set_flash_text').empty().removeClass('bg-success');
                 }, 5000)
             },
             error: function (XHR) {
-                let error = JSON.parse(XHR.responseText)
-                $('#set_flash_text').empty().text(error.message).removeClass('bg-success').addClass('bg-danger')
+                let error = JSON.parse(XHR.responseText);
+                $('#set_flash_text').empty().text(error.message).removeClass('bg-success').addClass('bg-danger');
             }
         });
     }
