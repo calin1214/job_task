@@ -17,12 +17,7 @@ class Appointment extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class)->orderBy('id');
-    }
-
-    public function user1()
-    {
-        return $this->hasOne(User::class, 'user_id', 'id')->orderBy('id');
+        return $this->hasOne(User::class, 'user_id', 'id');
     }
 
     /**
